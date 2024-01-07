@@ -68,7 +68,7 @@ def delete_user(car_id):
     #cars_data = request.get_json()
     #model = cars_data['model']
     try:
-        del cars[id]
+        del cars[car_id]
         return{ 'message': f'model Deleted'}, 202
     except:
         return {'Message': "Invalid"}, 400
@@ -90,10 +90,22 @@ def create_post():
         return { 'message': "Car Added"}, 201
     return { 'message': "Invalid User"}, 401
 
-@app.put('/specs')
-def update_post():
-    return
+@app.put('/specs/<spec_id>')
+def update_post(spec_id):
+    try:
+        specs = specs[spec_id]
+        spec_data = request.get_json()
+        if spec_data['spec_id'] == specs['spec_id']:
+            specs['body'] = spec_data['body']
+            return {'message': "specs updated"}, 202
+        return {'message': "Unauthorized"}, 401
+    except:
+        return {'message': "invalid"}, 400
 
-@app.delete('/specs')
-def delte_post():
-    return
+@app.delete('/specs/<spec_id>')
+def delte_post(spec_id):
+    try:
+        del specs[spec_id]
+        return {'message': "specs deleted"}, 202
+    except:
+        return {'message': "Invalid post"}, 202
