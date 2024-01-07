@@ -46,6 +46,14 @@ specs = {
 def car():
     return { 'cars': list(cars.values())}, 200
 
+@app.get('/car/<car_id>')
+def get_car(car_id):
+    try:
+        return{'car': cars[car_id]}, 200
+    except:
+        return{'message': 'invalid car'}, 400
+    
+
 
 @app.post('/car')
 def create_car():
@@ -57,8 +65,13 @@ def create_car():
 def update_car(car_id):
     try:
      car = cars[car_id]
+     print(1)
      cars_data = request.get_json()
-     car|= cars_data
+     print(2)
+     if cars_data[car_id] != cars[car_id]:
+            print(3)
+            cars[car_id] = cars_data[car_id]
+            print(4)
      return { 'message': f'{car["model"]} updated'}, 202
     except KeyError:
         return {'message': "invalid"}, 400
@@ -79,6 +92,13 @@ def delete_user(car_id):
 @app.get('/specs')
 def get_posts():
     return{'posts': list(specs.values())}
+
+@app.get('/specs/<spec_id>')
+def get_specs(spec_id):
+    try:
+        return{'/specs': specs[spec_id]}, 200
+    except:
+        return {'Message': "Invalid"}, 400
 
 @app.post('/specs')
 def create_post():
