@@ -1,103 +1,81 @@
 from flask import request
-from uuid import uuid4
-from flask.views import MethodView
-from flask_smorest import abort
 
-from models.cars_model import CarsModel
-from schemas import CarsSchema
-from db import specs, cars
+from flask.views import MethodView
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_smorest import abort
 from . import bp
 
+from schemas import CarsSchema, CarsSchemaNested
+from models.cars_model import CarsModel
+# user routes
 
+@bp.route('/cars/<cars_id>')
+class User(MethodView):
 
-@bp.route('/car/<car_id>')
-class Cars(MethodView):
-    
-    @bp.response(200, CarsSchema)
-    def get(self, car_id):
-        cars = CarsModel.query.get(car_id)
-        if cars:
-            return cars
-    abort(400, message = 'Invalid Car')
-        
-    @bp.arguments(CarsSchema)
-    def put(self, car_data, car_id):
-        cars = CarsModel.query.get(car_id)
-        if cars:
-            cars.body = car_data['body']
-            cars.commit()
-        return {'message': "invalid"}, 400
+  @bp.response(200, CarsSchemaNested)
+  def get(self,cars_id):
+    cars = CarsModel.query.get(cars_id)
+    if cars:
+      print(cars.posts.all())
+      return cars
+    else:
+      abort(400, message='Cars not found')
 
-    def delete(self, car_id):
-        cars = CarsModel.query.get(car_id)
-        if cars:
-                cars.delete()
-                del cars[car_id]
-                return{ 'message': f'model Deleted'}, 202
-                return {'Message': "Invalid"}, 400
-            
-@bp.route('/car')
+  @jwt_required()  
+  @bp.arguments(CarsSchema)
+  def put(self, cars_data, cars_id):
+    cars = CarsModel.query.get(get_jwt_identity())
+    if cars and cars.id == cars_id:
+      cars.from_dict(cars_data)
+      cars.commit()
+      return { 'message': f'{cars.username} updated'}, 202
+    abort(400, message = "Invalid Car")
+
+  @jwt_required()
+  def delete(self, cars_id):
+    cars = CarsModel.query.get(get_jwt_identity())
+    if cars == cars_id:
+      cars.delete()
+      return { 'message': f'User: {cars.username} Deleted' }, 202
+    return {'message': "Invalid car"}, 400
+
+@bp.route('/cars')
 class CarsList(MethodView):
 
-    @bp.response(200, CarsSchema(many = True))
-    def get(self):
-        return CarsModel.query.all()
-    
+  @bp.response(200, CarsSchema(many = True))
+  def get(self):
+   return CarsModel.query.all()
+  
+  @bp.arguments(CarsSchema)
+  def post(self, cars_data):
+    try: 
+      cars = CarsModel()
+      cars.from_dict(cars_data)
+      cars.commit()
+      return { 'message' : f'{cars_data["username"]} created' }, 201
+    except:
+      abort(400, message='Username and Email Already taken')
+      
+@bp.route('/cars/follow/<followed_id>')
+class FollowUser(MethodView):
 
-    @bp.arguments(CarsSchema)
-    def post(self, car_data):
-        try:
-            cars = CarsModel
-            cars.car_id = car_data['car_id']
-            cars.body = car_data['body']
-            cars.commit()
-            return{ 'message' : f'{car_data["car"]} created'}, 201
-        except:
-            return {'message': 'Invalid Car'}, 401
-
-
-
-@bp.response(200, CarsSchema(many=True))
-@bp.get('/')
-def car():
-    return { 'cars': list(cars.values())}, 200
-
-
-@bp.post('/')
-@bp.arguments(CarsSchema)
-def create_car(json_body):
-    cars[uuid4()] = json_body
-    return{ 'message' : f'{json_body["car"]} created'}, 201
-
-
-# @bp.get('/car/<car_id>')
-# @bp.response(200, CarsSchema)
-# def get_car(car_id):
-#      try:
-#          return{'car': cars[car_id]}, 200
-#      except:
-#          return{'message': 'invalid car'}, 400
-
-
-@bp.put('/<car_id>')
-def update_car(car_id):
-    try:
-     car = cars[car_id]
-     cars_data = request.get_json()
-     if cars_data[car_id] != cars[car_id]:
-            cars[car_id] = cars_data[car_id]
-     return { 'message': f'{car["model"]} updated'}, 202
-    except KeyError:
-        return {'message': "invalid"}, 400
-
-
-
-# @bp.delete('/<car_id>')
-# def delete_user(car_id):
-#     #cars_data = request.get_json()
-#     #model = cars_data['model']
-#     try:
-#         del cars[car_id]
-#         return{ 'message': f'model Deleted'}, 202
-#     except:
-#         return {'Message': "Invalid"}, 400
+  @jwt_required()
+  def post(self, followed_id):
+    followed = CarsModel.query.get(followed_id)
+    follower =CarsModel.query.get(get_jwt_identity())
+    if follower and followed:
+      follower.follow(followed)
+      followed.commit()
+      return {'message':'cars followed'}
+    else:
+      return {'message':'invalid user'}, 400
+  @jwt_required()  
+  def put(self, followed_id):
+    followed = CarsModel.query.get(followed_id)
+    follower = CarsModel.query.get(get_jwt_identity())
+    if follower and followed:
+      follower.unfollow(followed)
+      followed.commit()
+      return {'message':'cars unfollowed'}
+    else:
+      return {'message':'invalid user'}, 400

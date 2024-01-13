@@ -6,6 +6,9 @@ class CarsSchema(Schema):
     year = fields.Str(required = True)
     password = fields.Str(required = True, load_only = True)
 
+class CarsLogin(Schema):
+  username = fields.Str(required = True)
+  password = fields.Str(required = True, load_only = True )
 
 class SpecsSchema(Schema):
     HP = fields.Str(dump_only = True)
@@ -13,3 +16,9 @@ class SpecsSchema(Schema):
     timestamp = fields.DateTime(dump_only = True)
 
     specs_id = fields.Str(required = True)
+
+class SpecsSchemaNested(SpecsSchema):
+  user = fields.Nested(CarsSchema, dump_only = True)
+
+class CarsSchemaNested(CarsSchema):
+  posts = fields.List(fields.Nested(SpecsSchema), dump_only=True)
