@@ -69,8 +69,8 @@ class SpecsModel(db.Model):
   id = db.Column(db.Integer, primary_key = True)
   body = db.Column(db.String, nullable = False)
   timestamp = db.Column(db.DateTime, default = datetime.utcnow())
-  user_id = db.Column(db.Integer, db.ForeignKey('specs.id'), nullable = False)
-  user = db.relationship('CarsModel', back_populates = 'specs')
+  # user_id = db.Column(db.Integer, db.ForeignKey('specs.id'), nullable = False)
+  # user = db.relationship('CarsModel', back_populates = 'specs')
 
   def __repr__(self):
     return f'<Specs: {self.body}>'
