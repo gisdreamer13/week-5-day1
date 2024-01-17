@@ -14,9 +14,9 @@ class CarsModel(db.Model):
   __tablename__ = 'Cars'
 
   id = db.Column(db.Integer, primary_key = True)
-  username = db.Column(db.String(50), nullable = False, unique = True)
-  email = db.Column(db.String(75), nullable = False, unique = True)
-  password_hash = db.Column(db.String(250), nullable = False )
+  model = db.Column(db.String(50), nullable = False)
+  year = db.Column(db.String(75), nullable = False)
+  # password_hash = db.Column(db.String(250), nullable = False )
   # first_name = db.Column(db.String(30))
   # last_name = db.Column(db.String(30))
   # followed = db.relationship('CarsModel',
@@ -40,11 +40,9 @@ class CarsModel(db.Model):
 
   def from_dict(self, cars_dict):
     for k, v in cars_dict.items():
-      if k != 'password':
         setattr(self, k, v)
-      else:
-        setattr(self, 'password_hash', generate_password_hash(v))
-        # self.password_hash = v
+        # self.passwor
+        # d_hash = v
 
   def check_password(self, password):
     return check_password_hash(self.password_hash, password)
@@ -67,9 +65,9 @@ class SpecsModel(db.Model):
   __tablename__ = 'specs'
 
   id = db.Column(db.Integer, primary_key = True)
-  body = db.Column(db.String, nullable = False)
-  timestamp = db.Column(db.DateTime, default = datetime.utcnow())
-  # user_id = db.Column(db.Integer, db.ForeignKey('specs.id'), nullable = False)
+  HP = db.Column(db.String, nullable = False)
+  # car_id = db.Column(db.foreign)
+  car_id = db.Column(db.Integer, db.ForeignKey('Cars.id'), nullable = False)
   # user = db.relationship('CarsModel', back_populates = 'specs')
 
   def __repr__(self):

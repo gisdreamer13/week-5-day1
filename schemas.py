@@ -4,7 +4,7 @@ class CarsSchema(Schema):
     id = fields.Str(dump_only = True)
     model = fields.Str(required = True)
     year = fields.Str(required = True)
-    password = fields.Str(required = True, load_only = True)
+    # password = fields.Str(required = True, load_only = True)
 
 class CarsLogin(Schema):
   username = fields.Str(required = True)

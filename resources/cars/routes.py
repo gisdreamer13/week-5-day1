@@ -48,11 +48,11 @@ class CarsList(MethodView):
   
   @bp.arguments(CarsSchema)
   def post(self, cars_data):
-    try: 
+    try:
       cars = CarsModel()
       cars.from_dict(cars_data)
       cars.commit()
-      return { 'message' : f'{cars_data["username"]} created' }, 201
+      return { 'message' : f'{cars_data["model"]} created' }, 201
     except:
       abort(400, message='Username and Email Already taken')
       
