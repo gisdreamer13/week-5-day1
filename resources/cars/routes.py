@@ -54,7 +54,7 @@ class CarsList(MethodView):
       cars.commit()
       return { 'message' : f'{cars_data["model"]} created' }, 201
     except:
-      abort(400, message='Username and Email Already taken')
+      abort(400, message='Car already Created')
       
 @bp.route('/cars/follow/<followed_id>')
 class FollowUser(MethodView):

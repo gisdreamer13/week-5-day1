@@ -11,11 +11,11 @@ class CarsLogin(Schema):
   password = fields.Str(required = True, load_only = True )
 
 class SpecsSchema(Schema):
-    HP = fields.Str(dump_only = True)
+    HP = fields.Str(required = True)
     car_id = fields.Str(required = True)
-    timestamp = fields.DateTime(dump_only = True)
+    # timestamp = fields.DateTime(dump_only = True)
 
-    specs_id = fields.Str(required = True)
+    specs_id = fields.Str(dump_only = True)
 
 class SpecsSchemaNested(SpecsSchema):
   user = fields.Nested(CarsSchema, dump_only = True)
